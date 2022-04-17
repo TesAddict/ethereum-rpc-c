@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.13)
+project(ethereum-rpc-c)
+set(C_STANDARD C99)
+set(CMAKE_BUILD_TYPE Debug)
+add_executable(ethereum-rpc-c src/main.c src/jsonrpc_client.c src/jsonrpc_request.c)
+target_include_directories(ethereum-rpc-c PUBLIC inc)
+target_link_libraries(ethereum-rpc-c PUBLIC curl)
