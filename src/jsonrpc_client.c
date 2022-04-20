@@ -29,15 +29,23 @@ int jsonrpc_client_init(const char *hostname, uint port) {
     }
 }
 
-int jsonrpc_client_send(jsonrpc_request_t *req) {
+void jsonrpc_client_free() {
+  curl_easy_cleanup(curl);
+}
+
+jsonrpc_response_t *jsonrpc_client_send(jsonrpc_request_t *req) {
   struct string s;
   char *jsonstr = jsonrpc_request_to_jsonstr(req);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonstr);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
   CURLcode res = curl_easy_perform(curl);
-  if (res != CURLE_OK) return -1;
+  if (res != CURLE_OK) {
+    free(jsonstr);
+    return NULL;
+  }
   free(jsonstr);
-  printf("%s\n", s.ptr);
-  return 0;
+  jsonrpc_response_t *resp = jsonrpc_response_init(s.ptr);
+  free(s.ptr);
+  return resp;
 }
