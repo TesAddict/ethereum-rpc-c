@@ -1,7 +1,5 @@
 #include "jsonrpc_client.h"
 
-static CURL *curl;
-
 struct string {
     char *ptr;
     size_t len;
@@ -21,19 +19,22 @@ static size_t write_callback(void *ptr, size_t size, size_t nmemb, struct string
   return size*nmemb;
 }
 
-int jsonrpc_client_init(const char *hostname, uint port) {
-    curl = curl_easy_init();
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, hostname);
-        curl_easy_setopt(curl, CURLOPT_PORT, port);
+CURL *jsonrpc_client_init(const char *hostname, uint port) {
+    CURL *curl = curl_easy_init();
+    if (curl == NULL) {
+      fprintf(stderr, "curl_easy_init() failed.\n");
+      return NULL;
     }
+    curl_easy_setopt(curl, CURLOPT_URL, hostname);
+    curl_easy_setopt(curl, CURLOPT_PORT, port);
+    return curl;
 }
 
-void jsonrpc_client_free() {
+void jsonrpc_client_free(CURL *curl) {
   curl_easy_cleanup(curl);
 }
 
-jsonrpc_response_t *jsonrpc_client_send(jsonrpc_request_t *req) {
+jsonrpc_response_t *jsonrpc_client_send(CURL *curl, jsonrpc_request_t *req) {
   struct string s;
   char *jsonstr = jsonrpc_request_to_jsonstr(req);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonstr);
