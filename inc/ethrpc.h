@@ -15,6 +15,8 @@ typedef struct {
 
 ethrpc_t *ethrpc_init(const char *hostname, int port);
 void ethrpc_free(ethrpc_t **ethrpc);
+
+
 long long eth_getBalance(ethrpc_t *ethrpc, const char *address, const char *block); 
 
 
